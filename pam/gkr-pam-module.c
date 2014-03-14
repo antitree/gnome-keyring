@@ -979,6 +979,17 @@ pam_chauthtok_update (pam_handle_t *ph, struct passwd *pwd, uint args)
 		}
 	}
 
+	/*
+	 * Likely the daemon is being started later in the session if we weren't
+	 * allowed to autostart it here. Store the password for our session handler
+	 */
+	if (!(args & ARG_AUTO_START)) {
+		if (pam_set_data (ph, "gkr_system_authtok", strdup (password),
+		                  cleanup_free_password) != PAM_SUCCESS) {
+			syslog (GKR_LOG_ERR, "gkr-pam: error storing authtok");
+		}
+	}
+
 	return ret;
 }
 
